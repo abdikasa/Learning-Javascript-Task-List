@@ -13,6 +13,7 @@ const addBtn = document.querySelector(".add-btn");
 function loadEvents() {
     addBtn.addEventListener("click", addTask);
     filter.addEventListener("input", filterTasks);
+    taskList.addEventListener("click", deleteStuffs);
 }
 
 loadEvents();
@@ -22,8 +23,8 @@ function addTask(e) {
     if (taskInput.value === "") {
         alert("Add a task")
     }
-    else if (alreadyExists(taskInput.value)===true) {
-        alert("Already")
+    else if (alreadyExists(taskInput.value)) {
+        alert("Already a task")
     }
     else {
         //Create Li element, add class, append text (the content user types). 
@@ -43,7 +44,6 @@ function addTask(e) {
         taskInput.value = "";
         //Prevents the page from redirecting.
         e.preventDefault();
-
     }
     e.preventDefault();
 }
@@ -53,12 +53,11 @@ function addTask(e) {
 
 function alreadyExists(passed) {
     for (let count = 0; count < array.length; count++) {
-        if(array[count].textContent.toLowerCase() === passed.toLowerCase()){
+        if (array[count].textContent.toLowerCase() === passed.toLowerCase()) {
             return true;
         }
     }
 }
-
 
 //Filters Tasks: Thought Process
 //First, I learned about the map function to return a new array if stored.
@@ -79,5 +78,12 @@ function filterTasks() {
             taskList.children[index].style.display = "block";
         }
     })
-
 }
+
+
+function deleteStuffs(e) {
+    if (e.target.classList.contains("fa-remove")) {
+        e.target.parentElement.parentElement.remove();
+    }
+}
+
