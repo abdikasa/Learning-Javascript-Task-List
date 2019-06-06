@@ -1,7 +1,6 @@
-let array = [];
 
 ///Define DOM Variables
-
+let array = [];
 const form = document.getElementById("task-form")
 const taskList = document.querySelector(".collection")
 const clearBtn = document.querySelector(".clear-tasks")
@@ -13,12 +12,14 @@ const addBtn = document.querySelector(".add-btn");
 function loadEvents() {
     addBtn.addEventListener("click", addTask);
     filter.addEventListener("input", filterTasks);
-    taskList.addEventListener("click", deleteStuffs);
+    taskList.addEventListener("click", deleteTasks);
 }
 
 loadEvents();
 
 //Add Task To List
+//Edit: Instead of adding the <li> elmement, I decided to only add the <li> content/value 
+//Edit 2: Reset the input tag for tasks for every possible outcome, better user experience. 
 function addTask(e) {
     if (taskInput.value === "") {
         alert("Add a task")
@@ -38,13 +39,23 @@ function addTask(e) {
         link.innerHTML = '<i class="fa fa-remove"></i>';
 
         li.appendChild(link)
-
         taskList.appendChild(li);
-        array.push(li);
-        taskInput.value = "";
+        array.push(li.textContent);
         //Prevents the page from redirecting.
     }
+    taskInput.value = "";
     e.preventDefault();
+}
+
+//updatePosts()
+//I needed a way to reset the array and update the tasks after a task 'gets' deleted.
+//Functions resets array, parses through the task list, and adds the content to the array.
+
+function updatePosts() {
+    array = [];
+    for (let count = 0; count < taskList.children.length; count++) {
+        array[count] = taskList.children[count].textContent.toLowerCase();
+    }
 }
 
 //alreadyExists(passed)
@@ -68,7 +79,7 @@ function alreadyExists(passed) {
 
 function filterTasks() {
     let filteredBoolean = array.map(function (tasks) {
-        return tasks.textContent.toLowerCase().includes(filter.value.toLowerCase())
+        return tasks.toLowerCase().includes(filter.value.toLowerCase());
     })
 
     let filteredTasks = filteredBoolean.forEach(function (tasks, index) {
@@ -81,10 +92,15 @@ function filterTasks() {
     })
 }
 
+//deleteTasks()
+//The event listener is on the ul > <li> tags.
+//Learned contains is only in classList, use includes for strings
+//This will target the x icon (<i>), target the parent element (<a>), finally, target the parent of that <li> and then remove it.
+//Edit: Added the updatePosts(), will update tasks after something is deleted.
 
-function deleteStuffs(e) {
+function deleteTasks(e) {
     if (e.target.classList.contains("fa-remove")) {
         e.target.parentElement.parentElement.remove();
     }
+    updatePosts();
 }
-
