@@ -43,17 +43,18 @@ function addTask(e) {
         array.push(li);
         taskInput.value = "";
         //Prevents the page from redirecting.
-        e.preventDefault();
     }
     e.preventDefault();
 }
 
 //alreadyExists(passed)
 //Prevents the same item being added to the task list, alert is raised if the same item is attempted to be added.  
+//Edit: Fixed major problem where since array is fixed, even when task is deleted, it still returns true. Changed to variable length with the DOM selector.
+
 
 function alreadyExists(passed) {
-    for (let count = 0; count < array.length; count++) {
-        if (array[count].textContent.toLowerCase() === passed.toLowerCase()) {
+    for (let count = 0; count < taskList.children.length; count++) {
+        if (taskList.children[count].textContent.toLowerCase() === passed.toLowerCase()) {
             return true;
         }
     }
