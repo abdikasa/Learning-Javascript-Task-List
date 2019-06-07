@@ -112,7 +112,7 @@ function filterTasks() {
 //Edit: Used for loop toiterate through the LS key/values, when the x-icon is clicked, the condition checks whether the <li> textContent matches the specific index of the task key in the local storage.
 //Edit 2: I tried removeItem(key), doesn't work since it's one key with an array of values. I learned we should instead use splice,  it will target the item we are trying to attempt to delete from the value pairs.
 //Edit 3: Items must be set in order to see the above changes, so we use stringify when storing and when retreiving we convert it back to an object. 
-
+//Edit 4: Realized after revising that array doesn't get updated, which leads to style errors hen trying to manipulate undefined variables. 
 
 function deleteTasks(e) {
     let tasks;
@@ -128,6 +128,7 @@ function deleteTasks(e) {
             }
         }
         localStorage.setItem("tasks", JSON.stringify(tasks));
+        updatePosts();
     }
 }
 
@@ -189,6 +190,8 @@ function checkLocalStorage(key) {
 //Really easy, just use the clear method. But of course I like to make things harder for myself.
 //So we will use the Node's firstChild property, returns null if no children exist or it will return the first child.
 //Fixed issue where the values would not persist, made the stupid mistake of deleting the ul.collection, instead this works easier, peformance is good too.
+//Edit: If after using this button and you used the filter input box, you would be modifying undefined variables with the style tag.
+//Edit fix: use updatePosts();
 
 function clearAll() {
     let tasks = checkLocalStorage("tasks");
@@ -197,5 +200,6 @@ function clearAll() {
     }
     tasks.splice(0, tasks.length);
     localStorage.setItem("tasks", JSON.stringify(tasks));
+    updatePosts();
 }
 
