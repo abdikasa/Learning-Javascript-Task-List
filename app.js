@@ -7,6 +7,8 @@ const clearBtn = document.querySelector(".clear-tasks")
 const filter = document.getElementById("filter")
 const taskInput = document.getElementById("task")
 const addBtn = document.querySelector(".add-btn");
+const clearAllBtn = document.querySelector(".clear-tasks");
+
 
 //Event Listeners
 function loadEvents() {
@@ -16,6 +18,7 @@ function loadEvents() {
     addBtn.addEventListener("click", addTask);
     filter.addEventListener("input", filterTasks);
     taskList.addEventListener("click", deleteTasks);
+    clearAllBtn.addEventListener("click", clearAll);
 }
 
 loadEvents();
@@ -179,4 +182,20 @@ function checkLocalStorage(key) {
         tasks = JSON.parse(localStorage.getItem(key));
     }
     return tasks;
-} 
+}
+
+//clearAll()
+//Forgot to add a clear all function. 
+//Really easy, just use the clear method. But of course I like to make things harder for myself.
+//So we will use the Node's firstChild property, returns null if no children exist or it will return the first child.
+//Fixed issue where the values would not persist, made the stupid mistake of deleting the ul.collection, instead this works easier, peformance is good too.
+
+function clearAll() {
+    let tasks = checkLocalStorage("tasks");
+    while (taskList.firstChild) {
+        taskList.firstChild.remove();
+    }
+    tasks.splice(0, tasks.length);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
