@@ -10,6 +10,9 @@ const addBtn = document.querySelector(".add-btn");
 
 //Event Listeners
 function loadEvents() {
+    //Event that wil load the items stored in local storage (if any). Persistent after refresh.
+    //DOMContentLoaded is called after the  DOM is loaded.
+    document.addEventListener("DOMContentLoaded", getTasksFromLS)
     addBtn.addEventListener("click", addTask);
     filter.addEventListener("input", filterTasks);
     taskList.addEventListener("click", deleteTasks);
@@ -20,6 +23,9 @@ loadEvents();
 //Add Task To List
 //Edit: Instead of adding the <li> elmement, I decided to only add the <li> content/value 
 //Edit 2: Reset the input tag for tasks for every possible outcome, better user experience. 
+//Edit 3: After adding LS fucntionality, line 94 had a problem, the variable array would never get updated till a task was deleted.
+//Edit 3.1: In other words, if user didn't delete a task, the array would continue to populate even after refreshing the page.
+//Edit 3.0-1 Fix: call the updatePosts() method when adding a task too.
 function addTask(e) {
     if (taskInput.value === "") {
         alert("Add a task")
@@ -41,9 +47,13 @@ function addTask(e) {
         li.appendChild(link)
         taskList.appendChild(li);
         array.push(li.textContent);
+
+        //Store in Local Storage
+        storeInLocalStorage(li.textContent)
         //Prevents the page from redirecting.
     }
     taskInput.value = "";
+    updatePosts();
     e.preventDefault();
 }
 
@@ -96,11 +106,77 @@ function filterTasks() {
 //The event listener is on the ul > <li> tags.
 //Learned contains is only in classList, use includes for strings
 //This will target the x icon (<i>), target the parent element (<a>), finally, target the parent of that <li> and then remove it.
-//Edit: Added the updatePosts(), will update tasks after something is deleted.
+//Edit: Used for loop toiterate through the LS key/values, when the x-icon is clicked, the condition checks whether the <li> textContent matches the specific index of the task key in the local storage.
+//Edit 2: I tried removeItem(key), doesn't work since it's one key with an array of values. I learned we should instead use splice,  it will target the item we are trying to attempt to delete from the value pairs.
+//Edit 3: Items must be set in order to see the above changes, so we use stringify when storing and when retreiving we convert it back to an object. 
+
 
 function deleteTasks(e) {
+    let tasks;
     if (e.target.classList.contains("fa-remove")) {
+        tasks = checkLocalStorage("tasks");
         e.target.parentElement.parentElement.remove();
+
+        for (let i = 0; i < tasks.length; i++) {
+            //    console.log(tasks[i].includes(e.target.parentElement.parentElement.textContent));
+            if (tasks[i].includes(e.target.parentElement.parentElement.textContent)) {
+                tasks.splice(i, 1);
+                break;
+            }
+        }
+        localStorage.setItem("tasks", JSON.stringify(tasks));
     }
+}
+
+//storeInLocalStorage()
+//First check if there is already tasks in local storage. 
+//if yes: tasks will be assigned to whatever is in LS, since all LS items are strings, we need to convert it back to an object.
+//Otherwise, set tasks to an empty array.
+//Lastly to set items we need to convert back to strings. "tasks" = key, tasks the variable is the value.
+
+function storeInLocalStorage(task) {
+    let tasks = checkLocalStorage("tasks");
+    tasks.push(task);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+//getTasksFromLS()
+//Checks to see if our key "tasks" exist.
+//Gets the tasks from LS after a refresh, aka persistence.
+//Issues Arised Below w/fix
+//Problem: When I refreshed the page and the text wouldn't appear but the <li> tag would.
+//FIX 1: added task variable since forEach has two parameters we can use, the array item and the index (optional).
+//Problem 2: When user refreshed the page, the updatePost() doesn't get called, whichmeans, filterTasks() doesn't get updated with the newest values.
+//Fix 2: When DOM is loaded, we want updatePosts() to be called. Function is now called when adding, deleting and now when the page loads. 
+
+function getTasksFromLS() {
+    let tasks = checkLocalStorage("tasks");
+    tasks.forEach(function (task) {
+        const li = document.createElement('li');
+        li.className = 'collection-item';
+        li.appendChild(document.createTextNode(task));
+
+        //create the link aka the x fa fa-remove button
+        const link = document.createElement('a');
+        link.className = `delete-item secondary-content`
+        link.innerHTML = '<i class="fa fa-remove"></i>';
+        li.appendChild(link)
+        taskList.appendChild(li);
+    })
     updatePosts();
 }
+
+//checkLocalStorage(key)
+//Realized this portion of the code was repeated about 3 times.
+//Used the variable key as the local passed parameter because I could pass whatever string I want to act as the key in the function. 
+//Returns the array.
+
+function checkLocalStorage(key) {
+    let tasks;
+    if (localStorage.getItem(key) === null) {
+        tasks = [];
+    } else {
+        tasks = JSON.parse(localStorage.getItem(key));
+    }
+    return tasks;
+} 
